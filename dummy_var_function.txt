@@ -1,0 +1,87 @@
+
+#################################################### 
+## Built by Jarrett Thibodeaux with R Version 3.4.3
+#################################################### 
+
+#################################################### FUNCTION DEFINITION:
+####### dummy_var_function(full_data, no_ratio = TRUE)
+  ## full_data = user's data. 
+  ## no_ratio = By default (no_ratio = TRUE), the function does not transform variables with over 25 levels. 
+     ## Make the 2nd statement FALSE to convert variables with over 25 levels into dummy variables.
+####### NOTE: When calling the function, you need to save it as an object: e.g.: dummy_transformed_data <- dummy_var_function(data)
+
+
+#################################################### DESCRIPTION:
+####### Problem to address:
+ ## Some methods such as multi-variate ARIMA and the associated binary_prop_matrix cannot handle multi-categorical variables. 
+   ## Changing a dataset with a large number of multi-categorical variables can be combersome.
+   ## This function changes all multi-categorical variables in a dataset into binary variables while keeping existing binary & ratio level variables in place.
+
+####### Purpose:
+ ## Quickly change all multi-categorical variables in a dataset into a series of dummy variables (while keeping existing binary & ratio level variables in place).
+   ## Use this function goes well with the associated 'binary_prop_matrix', which only handles binary variables. 
+
+
+
+
+########################################################################################################################
+########################################################################################################################
+       ########################################  dummy_var_function  ########################################
+########################################################################################################################
+
+###### Default is it skips variables with over 25 levels. Make the 2nd statement FALSE to convert variables with over 25 levels into dummy variables:
+dummy_var_function <- function(full_data, no_ratio = TRUE) {
+names_list <- names(full_data)
+for (i in names_list) {
+                  factor_length <- length(unique(na.omit(full_data[, i])))
+                  if(factor_length > 2)
+                             {
+                             for (ii in levels(factor(full_data[, i])))
+                                 {
+                                 ifelse(factor_length > 25 & no_ratio == TRUE, 
+                                        full_data[, i] <- full_data[, i],
+                                        ifelse(class(full_data[, i]) == "numeric",
+                                               full_data[ , paste0(i,"_",ii)] <- ifelse(full_data[ , i] == as.numeric(ii), 1, 0),
+                                               full_data[ , paste0(i,"_",ii)] <- ifelse(full_data[ , i] == ii, 1, 0)
+                                               )
+                                       )
+                                 }
+                             }
+                      }
+return(full_data)
+}
+
+
+
+
+
+
+
+
+
+########################################################################################################################
+############################################ EXAMPLE:
+###### Transform multi-categorical variable 'marital_status' (e.g. 1 = Single):
+#new_dummy_data <- dummy_var_function(df)
+#head(new_dummy_data)
+#  MARITAL MARITAL_1 MARITAL_2 MARITAL_3 MARITAL_4 MARITAL_5 MARITAL_6 MARITAL_9
+#1       1         1         0         0         0         0         0         0
+#2       1         1         0         0         0         0         0         0
+#3       3         0         0         1         0         0         0         0
+#4       1         1         0         0         0         0         0         0
+#5       5         0         0         0         0         1         0         0
+#6       3         0         0         1         0         0         0         0
+
+
+###### Transform multi-categorical variable 'marital_status' (works for categorical variables too):
+#new_dummy_data <- dummy_var_function(df)
+#head(new_dummy_data)
+#  marital_status marital_status_Divorced marital_status_NA marital_status_Separated marital_status_Single marital_status_Widowed
+#1         Single                       0                 0                        0                     1                      0
+#2         Single                       0                 0                        0                     1                      0
+#3      Separated                       0                 0                        1                     0                      0
+#4         Single                       0                 0                        0                     1                      0
+#5        Widowed                       0                 0                        0                     0                      1
+#6      Separated                       0                 0                        1                     0                      0
+
+
